@@ -35,9 +35,12 @@
     "webpack-dev-server": "^3.9.0"
   },
   "dependencies": {
+    "@material-ui/core": "^4.6.0",
+    "@material-ui/icons": "^4.5.1",
     "prop-types": "^15.7.2",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
+    "typeface-roboto": "0.0.75",
     "web3": "^1.2.2",
     "web3-react": "^5.0.4"
   }
