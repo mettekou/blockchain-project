@@ -26,6 +26,9 @@
     "eslint-plugin-react": "^7.16.0",
     "eslint-plugin-react-hooks": "^1.7.0",
     "eslint-plugin-standard": "^4.0.1",
+    "ethereumjs-tx": "^2.1.1",
+    "ganache-cli": "^6.7.0",
+    "path": "^0.12.7",
     "source-map-loader": "^0.2.4",
     "ts-loader": "^6.2.1",
     "typescript": "^3.6.4",
@@ -37,11 +40,12 @@
   "dependencies": {
     "@material-ui/core": "^4.6.0",
     "@material-ui/icons": "^4.5.1",
+    "@zxing/library": "^0.15.2",
+    "ethers": "^4.0.39",
     "prop-types": "^15.7.2",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "typeface-roboto": "0.0.75",
-    "web3": "^1.2.2",
     "web3-react": "^5.0.4"
   }
 }
