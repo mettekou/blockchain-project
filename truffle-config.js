@@ -95,5 +95,6 @@ module.exports = {
       //  evmVersion: "byzantium"
       // }
     }
-  }
+  },
+  contracts_build_directory: 'src/abis',
 }
