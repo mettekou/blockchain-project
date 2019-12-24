@@ -67,6 +67,7 @@ contract ItsMineContract {
 
 	// functie om te kijken of een asset succesvol geregistreerd en geverified is
 	function checkAssetRegistration (address _manufacturer, address _user, bytes32 _assetID) public view returns (bool) {
+		bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
 		bytes32 userValue = registry.getClaim(_manufacturer, _user, hashedAssetID);
 		require(userValue != 0, "asset not verified");
 
