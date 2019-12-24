@@ -1,58 +1,80 @@
-pragma solidity ^0.6.0;
-contract ItsMineContract
-{
+pragma solidity 0.5.15;
+
+import "EthereumClaimsRegistry.sol";
+
+contract ItsMineContract {
 	mapping (address => bool) private certifiedManufacturers; 
-	mapping (bytes32 => address) private assetsRegistry;  // registry of registered assets hashedassetID ==> manufacturer address  
-	mapping (bytes32 => address) private claimedAssetsRegistry; // registry of claimed assets hashedassetID ==> user address
+
 	address owner;
-	
+	EthereumClaimsRegistry registry;
+
 	//constructor sets address owner to contract creator
-    constructor() public {owner = msg.sender;}
-	
-	
-		// Only owner (contract creator) has rights
-		modifier onlyOwner(){
-        require(msg.sender == owner);
+    constructor() public {
+        owner = msg.sender;
+        registry = EthereumClaimsRegistry(0x602152C9b222801e94D08f3878D8a324546E2016);
+    }
+
+	// Only owner (contract creator) has rights
+	modifier onlyOwner() {
+        require(msg.sender == owner, "only owner can do this");
         _;
-		}
-	
-		modifier onlyCertifiedManufacturer(){
+	}
+
+	modifier onlyCertifiedManufacturer() {
         require(certifiedManufacturers[msg.sender] == true, "manufacturer is not certified");
         _;
-		}
-	
-		function certifyManufacturer (address _manufacturer) public onlyOwner {
-        certifiedManufacturers[_manufacturer]=true;
-		}		
-	
-		function registerAsset (bytes32 _assetID) public onlyCertifiedManufacturer {  //only Certified manufacturer can register an asset
-			bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
-			assetsRegistry[hashedAssetID]=msg.sender;
-		}
-		
-		function claimAsset (address _manufacturer, bytes32 _assetID) public {
-			require(certifiedManufacturers[_manufacturer] == true , "manufacturer is not certified");
-			bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
-			require(assetsRegistry[hashedAssetID] == _manufacturer, "asset not registered");			// only a registered asset can be claimed
-			address user = claimedAssetsRegistry[hashedAssetID];
-			require(user == address(0x0) , "asset already claimed"); 												// only an unclaimed asset can be claimed
-			claimedAssetsRegistry[hashedAssetID] = msg.sender;
-		}
-		
-		function verifyClaim (address _manufacturer, bytes32 _assetID, address _user) public view returns (bool _result) {
-		require(certifiedManufacturers[_manufacturer] == true, "manufacturer is not certified");
+	}
+
+	function certifyManufacturer (address _manufacturer) public onlyOwner returns(bool) {
+        certifiedManufacturers[_manufacturer] = true;
+	}
+
+    // manufacturer registreert een asset
+	function registerAsset (bytes32 _assetID) public onlyCertifiedManufacturer {
 		bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
-		require(assetsRegistry[hashedAssetID] == _manufacturer , "asset not registered");
-		address user = claimedAssetsRegistry[hashedAssetID];
-		if (user == _user ) 
-		{ _result= true;}														// returns true if asset is claimed by _user
-		else
-		{ _result = false;}														// returns false
-		
-		    
-		}
-		
-		// function () public { throw; }  //rejector function
-		// function kill() public { if (msg.sender == owner) selfdestruct(owner); }
+
+		registry.setSelfClaim(hashedAssetID, bytes32(""));
+
+		// event
+	}
+
+	// user claimed een bepaalde asset
+	function claimAsset (address _manufacturer, bytes32 _assetID) public {
+		bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
+		bytes32 value = registry.getClaim(_manufacturer, _manufacturer, hashedAssetID);
+
+		require(value != 0, "asset not registered"); // only a registered asset can be claimed
+		require(value == bytes32(""), "asset already claimed"); // only an unclaimed asset can be claimed
+
+		registry.setSelfClaim(hashedAssetID, bytes32("")); // claim I have the asset
+
+		// event zodat manufacturer kan reageren
+	}
+
+	// claim word geverified door manufacturer
+	function verifyClaim (address _user, bytes32 _assetID) public onlyCertifiedManufacturer {
+		bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
+		bytes32 value = registry.getClaim(msg.sender, msg.sender, hashedAssetID);
+
+		require(value != 0, "asset not registered"); // only a registered asset can be verified
+		require(value == bytes32(""), "asset already claimed"); // only an unclaimed asset can be verified
+
+		registry.setSelfClaim(hashedAssetID, bytes32("C"));
+		registry.setClaim(_user, hashedAssetID, bytes32("")); // manufacturer confirms user has the asset
+
+		// event om te confirmen dat verification gelukt is
+	}
+
+	// functie om te kijken of een asset succesvol geregistreerd en geverified is
+	function checkAssetRegistration (address _manufacturer, address _user, bytes32 _assetID) public view returns (bool) {
+		bytes32 userValue = registry.getClaim(_manufacturer, _user, hashedAssetID);
+		require(userValue != 0, "asset not verified");
+
+		return true; // todo
+
+		//  event met result
+	}
+
+	// function () public { throw; }  //rejector function
+	// function kill() public { if (msg.sender == owner) selfdestruct(owner); }
 }
-		
