@@ -1,5 +1,6 @@
-contract EthereumClaimsRegistry {
+pragma solidity ^0.5.15;
 
+contract EthereumClaimsRegistry {
     mapping(address => mapping(address => mapping(bytes32 => bytes32))) public registry;
 
     event ClaimSet(

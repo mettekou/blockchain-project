@@ -3,6 +3,11 @@ pragma solidity 0.5.15;
 import "EthereumClaimsRegistry.sol";
 
 contract ItsMineContract {
+    event registerAssetEvent(address manufacturer, bytes32 hashedAssetID);
+    event claimAssetEvent(address claimant, address manufacturer, bytes32 hashedAssetID);
+    event verifyClaimEvent(address verifier, address user, bytes32 hashedAssetID);
+    event checkAssetRegistrationEvent(address manufacturer, address user, bytes32 hashedAssetID);
+    
 	mapping (address => bool) private certifiedManufacturers; 
 
 	address owner;
@@ -11,7 +16,7 @@ contract ItsMineContract {
 	//constructor sets address owner to contract creator
     constructor() public {
         owner = msg.sender;
-        registry = EthereumClaimsRegistry(0x602152C9b222801e94D08f3878D8a324546E2016);
+        registry = EthereumClaimsRegistry(0xA5fe6fba1aB7cDd335BCfF22aEd6735e3Ff64edB);
     }
 
 	// Only owner (contract creator) has rights
@@ -26,6 +31,8 @@ contract ItsMineContract {
 	}
 
 	function certifyManufacturer (address _manufacturer) public onlyOwner returns(bool) {
+		require(certifiedManufacturers[_manufacturer] = false, "manufacturer is already certified");
+		
         certifiedManufacturers[_manufacturer] = true;
 	}
 
@@ -33,9 +40,9 @@ contract ItsMineContract {
 	function registerAsset (bytes32 _assetID) public onlyCertifiedManufacturer {
 		bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
 
-		registry.setSelfClaim(hashedAssetID, bytes32(""));
+		registry.setClaim(msg.sender, hashedAssetID, bytes32(""));
 
-		// event
+		emit registerAssetEvent(msg.sender, hashedAssetID);
 	}
 
 	// user claimed een bepaalde asset
@@ -48,7 +55,7 @@ contract ItsMineContract {
 
 		registry.setSelfClaim(hashedAssetID, bytes32("")); // claim I have the asset
 
-		// event zodat manufacturer kan reageren
+		emit claimAssetEvent(msg.sender, _manufacturer, hashedAssetID);
 	}
 
 	// claim word geverified door manufacturer
@@ -62,18 +69,15 @@ contract ItsMineContract {
 		registry.setSelfClaim(hashedAssetID, bytes32("C"));
 		registry.setClaim(_user, hashedAssetID, bytes32("")); // manufacturer confirms user has the asset
 
-		// event om te confirmen dat verification gelukt is
+		emit verifyClaimEvent(msg.sender, _user, hashedAssetID);
 	}
 
 	// functie om te kijken of een asset succesvol geregistreerd en geverified is
 	function checkAssetRegistration (address _manufacturer, address _user, bytes32 _assetID) public view returns (bool) {
 		bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
 		bytes32 userValue = registry.getClaim(_manufacturer, _user, hashedAssetID);
-		require(userValue != 0, "asset not verified");
-
-		return true; // todo
-
-		//  event met result
+		
+		return userValue != 0;
 	}
 
 	// function () public { throw; }  //rejector function
