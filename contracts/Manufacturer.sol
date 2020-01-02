@@ -1,47 +1,45 @@
-pragma solidity 0.5.15;
+pragma solidity ^0.4.26;
 
 import "EthereumClaimsRegistry.sol";
+import "EthereumDIDRegistry.sol";
 
 contract Manufacturer {
     event registerAssetEvent(address manufacturer, bytes32 hashedAssetID);
     event verifyClaimEvent(address verifier, address user, bytes32 hashedAssetID);
     
-	EthereumClaimsRegistry registry;
+	EthereumClaimsRegistry claimsRegistry;
+	EthereumDIDRegistry identityRegistry;
 
-	//constructor sets address owner to contract creator
     constructor() public {
-        registry = EthereumClaimsRegistry(0x8d45312D3071190C90d7bfA96e0E0890D8C6e4F0);
+        claimsRegistry = EthereumClaimsRegistry(0xc7939F65A2e4a860367119f035F7377C9871F096);
+        identityRegistry = EthereumDIDRegistry(0x770d626c59a84C8190860bF8c1B1B97302953612);
     }
 
     // manufacturer registreert een asset
 	function registerAsset (bytes32 _assetID) public {
+        require(identityRegistry.identityOwner(address(this)) == address(this), "address not owned by sender");
+        
 		bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
 
-        registry.setSelfClaim(hashedAssetID, bytes32("")); 
+        claimsRegistry.setSelfClaim(hashedAssetID, bytes32("R")); 
 
-		emit registerAssetEvent(msg.sender, hashedAssetID);
+		emit registerAssetEvent(address(this), hashedAssetID);
 	}
 
 	// claim word geverified door manufacturer
 	function verifyClaim (address _user, bytes32 _assetID) public {
+        require(identityRegistry.identityOwner(address(this)) == address(this), "address not owned by sender");
+        
 		bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
-		bytes32 value = registry.getClaim(msg.sender, msg.sender, hashedAssetID);
+		bytes32 value = claimsRegistry.getClaim(address(this), address(this), hashedAssetID);
 
 		require(value != 0, "asset not registered"); // only a registered asset can be verified
-		require(value == bytes32(""), "asset already claimed"); // only an unclaimed asset can be verified
+		require(value == bytes32("R"), "asset already claimed"); // only an unclaimed asset can be verified
 
-		registry.setSelfClaim(hashedAssetID, bytes32("C")); // mark as claimed
-		registry.setClaim(_user, hashedAssetID, bytes32("")); // manufacturer confirms user has the asset
+		claimsRegistry.setSelfClaim(hashedAssetID, bytes32("C")); // mark as claimed
+		claimsRegistry.setClaim(_user, hashedAssetID, bytes32("C")); // manufacturer confirms user has the asset
 
-		emit verifyClaimEvent(msg.sender, _user, hashedAssetID);
-	}
-
-	// functie om te kijken of een asset succesvol geregistreerd en geverified is
-	function checkAssetRegistration (address _manufacturer, address _user, bytes32 _assetID) public view returns (bool) {
-		bytes32 hashedAssetID = keccak256(abi.encodePacked(_assetID));
-		bytes32 userValue = registry.getClaim(_manufacturer, _user, hashedAssetID);
-
-		return userValue != 0;
+		emit verifyClaimEvent(address(this), _user, hashedAssetID);
 	}
 
 	// function () public { throw; }  //rejector function

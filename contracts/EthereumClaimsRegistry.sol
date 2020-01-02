@@ -1,4 +1,4 @@
-pragma solidity ^0.5.15;
+pragma solidity ^0.4.19;
 
 contract EthereumClaimsRegistry {
     mapping(address => mapping(address => mapping(bytes32 => bytes32))) public registry;
