@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
+import { BrowserQRCodeSvgWriter } from '@zxing/library';
 
 import PrivateKey from './PrivateKey';
 import useStyles from '../useStyles';
+
+const resultId = 'qr-code-result';
 
 const Manufacturer = ({ identity }) => {
     const classes = useStyles();
@@ -33,6 +36,14 @@ const Manufacturer = ({ identity }) => {
         setAsset({ address: response.headers.location.split('/')[2], ...response.data});
     };
 
+    useEffect(() => {
+        if (asset.privateKey !== '') {
+          const writer = new BrowserQRCodeSvgWriter();
+          writer.write(asset.privateKey, 300, 300);
+          writer.writeToDom(`#${resultId}`, asset.privateKey, 300, 300);
+        }
+    });
+
     if (asset.privateKey !== '') {
         return (
             <Grid container>
@@ -42,6 +53,7 @@ const Manufacturer = ({ identity }) => {
                 <Grid item xs={12}>
                     <Typography variant="h3">Success</Typography>
                     <Typography variant="body1">Your household battery private key is <code>{asset.privateKey}</code>.</Typography>
+                    <div id={resultId} />
                 </Grid>
             </Grid>
         );
