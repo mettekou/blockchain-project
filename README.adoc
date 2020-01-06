@@ -1,0 +1,10 @@
+# Blockchain Project
+Dylan Meysmans <dylan.meysmans@student.howest.be>
+2020-01-06
+
+This project implements decentralized home battery management through the proposed standards https://github.com/ethereum/EIPs/issues/1056[ERC-1056] and https://github.com/ethereum/EIPs/issues/780[ERC-780]. Currently only identity creation and home battery production and commissioning are provided.
+The project consists of a server, which exposes a REST API for smart contract interaction, and a client which consumes said REST API. We implement the project in this manner to eliminate the need for Ethereum wallets or Ethereum-enabled browsers. However, do not confuse this for a centralized application: identities and home batteries are still connected to separate wallets, although these are funded by a central wallet whenever a transaction needs to take place.
+
+# Prerequisites
+
+- *Node.js* this project has been tested with version 12.x of Node.js
