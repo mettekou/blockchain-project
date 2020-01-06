@@ -5,6 +5,8 @@ import Grid from '@material-ui/core/Grid';
 import axios from 'axios';
 import { ethers } from 'ethers';
 
+import PrivateKey from './PrivateKey';
+
 const webcamId = 'qr-code-input';
 const resultId = 'qr-code-result';
 
@@ -23,9 +25,9 @@ const Prosumer = ({ identity }) => {
             setPrivateKey(result.getText());
             const response = await axios({
               method: 'put',
-              url: 'http://localhost:3000/asset/' + new ethers.Wallet(privateKey).address,
+              url: 'http://localhost:3000/asset/' + new ethers.Wallet(result.getText()).address,
               data: {
-                privateKey: privateKey,
+                privateKey: result.getText(),
                 owner: identity.address,
               }
             });
@@ -50,8 +52,11 @@ const Prosumer = ({ identity }) => {
     return (
       <Grid container>
         <Grid item xs={12}>
-          <Typography variant="h3">Register</Typography>
-          <Typography variant="body1">Hold the QR code for your household battery in front of your camera to register it</Typography>
+          <PrivateKey privateKey={identity.privateKey} />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography variant="h3">Commission</Typography>
+          <Typography variant="body1">Hold the QR code you find stuck to household battery in front of your camera to register it</Typography>
           <video id={webcamId} />
         </Grid>
       </Grid>
@@ -60,8 +65,11 @@ const Prosumer = ({ identity }) => {
 
   return (<Grid container>
     <Grid item xs={12}>
+      <PrivateKey privateKey={identity.privateKey} />
+    </Grid>
+    <Grid item xs={12}>
       <Typography variant="h3">Success</Typography>
-      <Typography variant="body1">Your smart battery has been registered</Typography>
+      <Typography variant="body1">Your household battery has been commissioned!</Typography>
       <div id={resultId} />
     </Grid>
   </Grid>);
