@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserQRCodeReader, BrowserQRCodeSvgWriter } from '@zxing/library';
+import { Typography } from '@material-ui/core';
 
 const webcamId = 'qr-code-input';
 const resultId = 'qr-code-result';
 
 const QrCodeInput = () => {
   const [text, setText] = useState('');
+  const [did, setDid] = useState('');
   const reader = useRef(new BrowserQRCodeReader());
   const decodeContinuouslyAsync = async () => {
     const videoInputDevices = await reader.current.listVideoInputDevices();
@@ -34,7 +36,13 @@ const QrCodeInput = () => {
   });
 
   if (text === '') {
-    return <video id={webcamId} />;
+    return (
+      <>
+        <Typography variant="h2">Register your smart battery</Typography>
+        <Typography variant="body1">Hold the QR code for your smart battery in front of your camera</Typography>
+        <video id={webcamId} />
+      </>
+    );
   }
 
   return <div id={resultId} />;
