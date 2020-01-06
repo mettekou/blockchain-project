@@ -1,5 +1,6 @@
 const fs = require('fs');
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const ethers = require('ethers');
 
@@ -8,6 +9,7 @@ const port = 3000;
 const padding = '000000000000000000000000';
 
 app.use(bodyParser.json());
+app.use(cors({exposedHeaders: ['Location']}));
 
 const provider = new ethers.providers.JsonRpcProvider("http://localhost:9545");
 const signer = provider.getSigner(0);
