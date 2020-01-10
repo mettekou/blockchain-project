@@ -1,4 +1,4 @@
-# Blockchain Project
+# Decentralized home battery management
 Dylan Meysmans <dylan.meysmans@student.howest.be>
 2020-01-06
 
